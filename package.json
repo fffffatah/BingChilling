@@ -16,5 +16,8 @@
     "libsodium-wrappers": "^0.7.9",
     "prism-media": "^1.3.2",
     "youtube-search-api": "^1.0.11"
+  },
+  "engines": {
+    "node": "16.x"
   }
 }
