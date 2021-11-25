@@ -25,8 +25,8 @@ client.on('messageCreate',async message=>{
             const channel = message.member.voice.channel;
             if(channel){ 
                 const streamdata = await getAudioStream(ytRes[0].id);
-                const resource = createAudioResource(streamdata);
-                const connection = joinVoiceChannel({
+                const resource = await createAudioResource(streamdata);
+                const connection = await joinVoiceChannel({
                     channelId: channel.id,
                     guildId: channel.guild.id,
                     adapterCreator: channel.guild.voiceAdapterCreator,
@@ -70,7 +70,7 @@ client.on('messageCreate',async message=>{
 })
 
 
-client.login(process.env.BC);
+client.login('OTEzMDYzNzI0OTY3OTIzNzIy.YZ5C2w.uPD96GRrin0BfZix7i7iJ7x3-Ok');
 
 //COMMAND PARSER
 const parseCommand = (message)=>{
@@ -87,11 +87,19 @@ const parsePayload = (message)=>{
 }
 //JOIN VOICE CHANNEL
 const getYtUrl = async (payload)=>{
-    const res = await youtubesearchapi.GetListByKeyword(payload,false,1);
-    return res.items;
+    try {
+        const res = await youtubesearchapi.GetListByKeyword(payload,false,1);
+        return res.items;
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 const getAudioStream = async (id)=>{
-    const res = await ytdl("https://www.youtube.com/watch?v="+id, {filter:'audioonly'});
-    return res;
+    try {
+        const res = await ytdl("https://www.youtube.com/watch?v="+id, {filter:'audioonly'});
+        return res;
+    } catch (error) {
+        console.log(error);
+    }
 }
