@@ -66,7 +66,7 @@ client.on('messageCreate',async message=>{
 })
 
 
-client.login('OTEzMDYzNzI0OTY3OTIzNzIy.YZ5C2w.uPD96GRrin0BfZix7i7iJ7x3-Ok');
+client.login(process.env.BC);
 
 //COMMAND PARSER
 const parseCommand = (message)=>{
