@@ -15,15 +15,16 @@ client.on('messageCreate',async message=>{
     switch(command) {
         case "play":
             console.log(payload);
-            const ytRes = await getYtUrl(payload);
-            console.log(ytRes);
+            try {
+                const ytRes = await getYtUrl(payload);
+                console.log(ytRes);
                 if(ytRes.length<1){
                     message.reply("Unable to Play Track!");
                     break;
                 }
             const channel = message.member.voice.channel;
             if(channel){ 
-                const streamdata = getAudioStream(ytRes[0].id);
+                const streamdata = await getAudioStream(ytRes[0].id);
                 const resource = createAudioResource(streamdata);
                 const connection = joinVoiceChannel({
                     channelId: channel.id,
@@ -51,6 +52,9 @@ client.on('messageCreate',async message=>{
             }
             else{
                 message.reply("You must be in a Voice Channel!");
+            }
+            } catch (error) {
+                console.log(error);
             }
             break;
         case "help":
@@ -87,7 +91,7 @@ const getYtUrl = async (payload)=>{
     return res.items;
 }
 
-const getAudioStream = (id)=>{
-    const res = ytdl("https://www.youtube.com/watch?v="+id, {filter:'audioonly'});
+const getAudioStream = async (id)=>{
+    const res = await ytdl("https://www.youtube.com/watch?v="+id, {filter:'audioonly'});
     return res;
 }
