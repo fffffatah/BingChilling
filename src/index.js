@@ -22,43 +22,44 @@ client.on('messageCreate',async message=>{
                     message.reply("Unable to Play Track!");
                     break;
                 }
-            const channel = message.member.voice.channel;
-            if(channel){ 
-                const streamdata = await getAudioStream(ytRes[0].id);
-                const resource = await createAudioResource(streamdata);
-                const connection = await joinVoiceChannel({
-                    channelId: channel.id,
-                    guildId: channel.guild.id,
-                    adapterCreator: channel.guild.voiceAdapterCreator,
-                });
-                connection.subscribe(player);
-                player.play(resource);
-                message.reply("Now Playing: "+ytRes[0].title);
-                player.on("idle",()=>{
-                    try{
-                        player.stop();
-                    }
-                    catch(e){
-                        console.log(e);
-                    }
-                    try{
-                        connection.destroy();
-                    }
-                    catch(e){
-                        console.log(e);
-                    }
+                const channel = message.member.voice.channel;
+                if(channel){ 
+                    const streamdata = await getAudioStream(ytRes[0].id);
+                    const resource = createAudioResource(streamdata);
+                    const connection = joinVoiceChannel({
+                        channelId: channel.id,
+                        guildId: channel.guild.id,
+                        adapterCreator: channel.guild.voiceAdapterCreator,
+                    });
+                    await playAudioVc(connection, message, resource);
+                    // connection.subscribe(player);
+                    // player.play(resource);
+                    // message.reply("Now Playing: "+ytRes[0].title);
+                    // player.on("idle",()=>{
+                    //     try{
+                    //         player.stop();
+                    //     }
+                    //     catch(e){
+                    //         console.log(e);
+                    //     }
+                    //     try{
+                    //         connection.destroy();
+                    //     }
+                    //     catch(e){
+                    //         console.log(e);
+                    //     }
 
-                })
-            }
-            else{
-                message.reply("You must be in a Voice Channel!");
-            }
+                    // })
+                }
+                else{
+                    message.reply("You must be in a Voice Channel!");
+                }
             } catch (error) {
                 console.log(error);
             }
             break;
         case "help":
-            message.reply("1) '$p [song]' or '$play [song]' = Play Music from YouTube (Search/URL)\n2) '$pause' = Pause Currently Playing\n3) '$resume' = Resume Last Paused Playing\n4) '$stop' = Stop Currently Playing/Clear Queue\n5) '$queue' = List Queue");
+            message.reply("1) '$play [song]' = Play Music from YouTube (Search/URL)\n2) '$pause' = Pause Currently Playing\n3) '$resume' = Resume Last Paused Playing\n4) '$stop' = Stop Currently Playing/Clear Queue\n5) '$queue' = List Queue");
             break;
         case "stop":
             message.reply("Stopped!")
@@ -85,16 +86,16 @@ const parsePayload = (message)=>{
     const args = message.content.substring(message.content.indexOf(" ") + 1);
         return args;
 }
-//JOIN VOICE CHANNEL
+//GET YOUTUBE VIDEO ID
 const getYtUrl = async (payload)=>{
     try {
-        const res = await youtubesearchapi.GetListByKeyword(payload,false,1);
+        const res = await youtubesearchapi.GetListByKeyword(payload, false, 1);
         return res.items;
     } catch (error) {
         console.log(error);
     }
 }
-
+//GET AUDIO STREAM FROM YOUTUBE
 const getAudioStream = async (id)=>{
     try {
         const res = await ytdl("https://www.youtube.com/watch?v="+id, {filter:'audioonly'});
@@ -102,4 +103,19 @@ const getAudioStream = async (id)=>{
     } catch (error) {
         console.log(error);
     }
+}
+//PLAY AUDIO IN VC
+const playAudioVc = async (connection, message, resource)=>{
+    connection.subscribe(player);
+    player.play(resource);
+    message.reply("Now Playing: "+ytRes[0].title);
+    player.on("idle",()=>{
+        try{
+            player.stop();
+            connection.destroy();
+        }
+        catch(e){
+            console.log(e);
+        }
+    })
 }
