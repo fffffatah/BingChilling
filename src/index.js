@@ -43,8 +43,16 @@ client.on('messageCreate',async message=>{
             message.reply("1) '$play [song]' = Play Music from YouTube (Search/URL)\n2) '$pause' = Pause Currently Playing\n3) '$resume' = Resume Last Paused Playing\n4) '$stop' = Stop Currently Playing/Clear Queue\n5) '$queue' = List Queue");
             break;
         case "stop":
-            message.reply("Stopped!")
+            message.reply("Stopped!");
             player.stop();
+            break;
+        case "pause":
+            message.reply("Paused!");
+            player.pause();
+            break;
+        case "resume":
+            message.reply("Resumed!");
+            player.unpause();
             break;
         default:
             break;
