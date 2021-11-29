@@ -24,15 +24,13 @@ client.on('messageCreate',async message=>{
                     break;
                 }
                 const channel = message.member.voice.channel;
-                if(channel){ 
-                    const streamdata = await getAudioStream(ytRes[0].id);
-                    const resource = createAudioResource(streamdata);
+                if(channel){
                     const connection = joinVoiceChannel({
                         channelId: channel.id,
                         guildId: channel.guild.id,
                         adapterCreator: channel.guild.voiceAdapterCreator,
                     });
-                    await playAudioVc(connection, message, resource, ytRes);
+                    await playAudioVc(connection, message, ytRes);
                 }
                 else{
                     message.reply("You must be in a Voice Channel!");
@@ -88,8 +86,10 @@ const getAudioStream = async (id)=>{
     }
 }
 //PLAY AUDIO IN VC
-const playAudioVc = async (connection, message, resource, ytRes)=>{
+const playAudioVc = async (connection, message, ytRes)=>{
     try {
+        const streamdata = await getAudioStream(ytRes[0].id);
+        const resource = createAudioResource(streamdata);
         connection.subscribe(player);
         player.play(resource);
         message.reply("Now Playing: "+ytRes[0].title);
