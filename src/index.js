@@ -31,7 +31,7 @@ client.on('messageCreate',async message=>{
                         guildId: channel.guild.id,
                         adapterCreator: channel.guild.voiceAdapterCreator,
                     });
-                    await playAudioVc(connection, message, resource);
+                    await playAudioVc(connection, message, resource, ytRes);
                     // connection.subscribe(player);
                     // player.play(resource);
                     // message.reply("Now Playing: "+ytRes[0].title);
@@ -105,7 +105,7 @@ const getAudioStream = async (id)=>{
     }
 }
 //PLAY AUDIO IN VC
-const playAudioVc = async (connection, message, resource)=>{
+const playAudioVc = async (connection, message, resource, ytRes)=>{
     connection.subscribe(player);
     player.play(resource);
     message.reply("Now Playing: "+ytRes[0].title);
