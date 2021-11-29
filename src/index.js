@@ -32,24 +32,6 @@ client.on('messageCreate',async message=>{
                         adapterCreator: channel.guild.voiceAdapterCreator,
                     });
                     await playAudioVc(connection, message, resource, ytRes);
-                    // connection.subscribe(player);
-                    // player.play(resource);
-                    // message.reply("Now Playing: "+ytRes[0].title);
-                    // player.on("idle",()=>{
-                    //     try{
-                    //         player.stop();
-                    //     }
-                    //     catch(e){
-                    //         console.log(e);
-                    //     }
-                    //     try{
-                    //         connection.destroy();
-                    //     }
-                    //     catch(e){
-                    //         console.log(e);
-                    //     }
-
-                    // })
                 }
                 else{
                     message.reply("You must be in a Voice Channel!");
