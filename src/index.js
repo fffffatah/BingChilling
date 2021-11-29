@@ -88,9 +88,13 @@ const getAudioStream = async (id)=>{
 }
 //PLAY AUDIO IN VC
 const playAudioVc = async (connection, message, resource, ytRes)=>{
-    connection.subscribe(player);
-    player.play(resource);
-    message.reply("Now Playing: "+ytRes[0].title);
+    try {
+        connection.subscribe(player);
+        player.play(resource);
+        message.reply("Now Playing: "+ytRes[0].title);
+    } catch (error) {
+        console.log(error);
+    }
     player.on("idle",()=>{
         try{
             player.stop();
