@@ -15,6 +15,7 @@ client.on('messageCreate',async message=>{
     switch(command) {
         case "play":
             console.log(payload);
+            if(payload === ("$"+command)) break;
             try {
                 const ytRes = await getYtUrl(payload);
                 console.log(ytRes);
@@ -80,7 +81,7 @@ const getYtUrl = async (payload)=>{
 //GET AUDIO STREAM FROM YOUTUBE
 const getAudioStream = async (id)=>{
     try {
-        const res = await ytdl("https://www.youtube.com/watch?v="+id, {filter:'audioonly'});
+        const res = await ytdl("https://www.youtube.com/watch?v="+id+"&bpctr=9999999999", {filter:'audioonly'});
         return res;
     } catch (error) {
         console.log(error);
