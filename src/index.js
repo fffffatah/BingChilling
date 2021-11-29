@@ -92,16 +92,16 @@ const playAudioVc = async (connection, message, resource, ytRes)=>{
         connection.subscribe(player);
         player.play(resource);
         message.reply("Now Playing: "+ytRes[0].title);
+        player.on("idle",()=>{
+            try{
+                player.stop();
+                connection.destroy();
+            }
+            catch(e){
+                console.log(e);
+            }
+        })
     } catch (error) {
         console.log(error);
     }
-    player.on("idle",()=>{
-        try{
-            player.stop();
-            connection.destroy();
-        }
-        catch(e){
-            console.log(e);
-        }
-    })
 }
