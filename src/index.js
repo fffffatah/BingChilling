@@ -19,7 +19,7 @@ client.on('messageCreate',async message=>{
             if(payload === ("$"+command)) break;
             try {
                 const ytRes = await getYtUrl(payload);
-                console.log(ytRes);
+                console.log(ytRes[0]);
                 if(ytRes.length<1){
                     message.reply("Unable to Play Track!");
                     break;
@@ -31,7 +31,11 @@ client.on('messageCreate',async message=>{
                         guildId: channel.guild.id,
                         adapterCreator: channel.guild.voiceAdapterCreator,
                     });
-                    addToQueue(ytRes[0]);
+                    if(player.state.status === "buffering" || player.state.status === "playing" || player.state.status === "paused"){
+                        addToQueue(message, ytRes[0]);
+                        break;
+                    }
+                    addToQueue(message, ytRes[0]);
                     await playAudioVc(connection, message);
                 }
                 else{
@@ -42,9 +46,10 @@ client.on('messageCreate',async message=>{
             }
             break;
         case "help":
-            message.reply("1) '$play [song]' = Play Music from YouTube (Search/URL)\n2) '$pause' = Pause Currently Playing\n3) '$resume' = Resume Last Paused Playing\n4) '$stop' = Stop Currently Playing/Clear Queue\n5) '$queue' = List Queue");
+            message.reply("1) '$play [song]' = Play Music from YouTube (Search/URL)\n2) '$pause' = Pause Currently Playing\n3) '$resume' = Resume Last Paused Playing\n4) '$stop' = Stop Currently Playing/Clear Queue\n5) '$queue' = List Queue\n6) '$skip' = Skip Currently Playing\n7) '$remove [track number] = Remove Specific Track from Queue'");
             break;
         case "stop":
+            musicQueue = [];
             message.reply("Stopped!");
             player.stop();
             break;
@@ -57,10 +62,19 @@ client.on('messageCreate',async message=>{
             player.unpause();
             break;
         case "queue":
-            printQueue();
+            printQueue(message);
+            break;
+        case "skip":
+            message.reply("Skipped!");
+            player.stop();
             break;
         case "remove":
             if(payload === ("$"+command)){
+                break;
+            }
+            if(payload === "1"){
+                message.reply("Skipped!");
+                player.stop();
                 break;
             }
             removeFromQueueSpecific(message, payload);
@@ -116,7 +130,8 @@ const playAudioVc = async (connection, message)=>{
             message.reply("Now Playing: "+temp.title);
             player.on("idle",()=>{
                 try{
-                    await playAudioVc(connection, message);
+                    musicQueue.splice(0, 1);
+                    playAudioVc(connection, message);
                 }
                 catch(e){
                     console.log(e);
@@ -134,12 +149,12 @@ const playAudioVc = async (connection, message)=>{
 
 //PRINT QUEUE
 const printQueue = (message)=>{
-    var temp = "[Queue Items]";
+    var temp = "";
     if(musicQueue.length>0){
         for(let i = 0; i < musicQueue.length; i++){
-            temp = i+") "+temp+"\n"+musicQueue[i].title;
+            temp = temp+"\n"+(i+1)+") "+musicQueue[i].title;
         }
-        message.reply(temp);
+        message.reply("[Queue Items]"+temp);
     }
     else{
         message.reply("Queue Empty!");
@@ -152,16 +167,11 @@ const addToQueue = (message, music)=>{
     message.reply("Added To Queue: "+music.title);
 }
 
-//REMOVE FROM QUEUE ON FINISH
-const removeFromQueue = ()=>{
-    musicQueue = musicQueue.splice(0, 1);
-}
-
 //REMOVE FROM QUEUE (SPECIFIC)
 const removeFromQueueSpecific = (message, index)=>{
     if(musicQueue.length>0 && index>0 && index<=musicQueue.length){
         message.reply("Removed from Queue: "+musicQueue[index-1].title);
-        musicQueue = musicQueue.splice(index-1, 1);
+        musicQueue.splice(index-1, 1);
     }
     else{
         message.reply("Couldn't Remove!");
@@ -172,7 +182,7 @@ const removeFromQueueSpecific = (message, index)=>{
 const getFromQueue = ()=>{
     if(musicQueue.length>0){
         temp = musicQueue[0];
-        removeFromQueue();
+        //removeFromQueue();
         return temp;
     }
     else{
