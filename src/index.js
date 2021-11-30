@@ -8,6 +8,7 @@ var musicQueue = [];
 client.once('ready',()=>{
     console.log("BingChilling!");
 });
+client.user.setActivity("$help",{type:'LISTENING'});
 
 client.on('messageCreate',async message=>{
     const command = parseCommand(message);
@@ -182,7 +183,6 @@ const removeFromQueueSpecific = (message, index)=>{
 const getFromQueue = ()=>{
     if(musicQueue.length>0){
         temp = musicQueue[0];
-        //removeFromQueue();
         return temp;
     }
     else{
