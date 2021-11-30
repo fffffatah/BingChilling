@@ -5,10 +5,11 @@ const youtubesearchapi = require('youtube-search-api');
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MESSAGE_TYPING", "GUILD_VOICE_STATES"] })
 const player = createAudioPlayer();
 var musicQueue = [];
+client.login(process.env.BC);
 client.once('ready',()=>{
     console.log("BingChilling!");
+    client.user.setActivity("$help",{type:'LISTENING'});
 });
-client.user.setActivity("$help",{type:'LISTENING'});
 
 client.on('messageCreate',async message=>{
     const command = parseCommand(message);
@@ -86,7 +87,6 @@ client.on('messageCreate',async message=>{
 })
 
 
-client.login(process.env.BC);
 
 //COMMAND PARSER
 const parseCommand = (message)=>{
