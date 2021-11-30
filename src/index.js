@@ -4,6 +4,7 @@ const { createAudioPlayer, createAudioResource, joinVoiceChannel } = require('@d
 const youtubesearchapi = require('youtube-search-api');
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MESSAGE_TYPING", "GUILD_VOICE_STATES"] })
 const player = createAudioPlayer();
+var musicQueue = [];
 client.once('ready',()=>{
     console.log("BingChilling!");
 });
@@ -30,7 +31,8 @@ client.on('messageCreate',async message=>{
                         guildId: channel.guild.id,
                         adapterCreator: channel.guild.voiceAdapterCreator,
                     });
-                    await playAudioVc(connection, message, ytRes);
+                    addToQueue(ytRes[0]);
+                    await playAudioVc(connection, message);
                 }
                 else{
                     message.reply("You must be in a Voice Channel!");
@@ -53,6 +55,15 @@ client.on('messageCreate',async message=>{
         case "resume":
             message.reply("Resumed!");
             player.unpause();
+            break;
+        case "queue":
+            printQueue();
+            break;
+        case "remove":
+            if(payload === ("$"+command)){
+                break;
+            }
+            removeFromQueueSpecific(message, payload);
             break;
         default:
             break;
@@ -94,23 +105,77 @@ const getAudioStream = async (id)=>{
     }
 }
 //PLAY AUDIO IN VC
-const playAudioVc = async (connection, message, ytRes)=>{
+const playAudioVc = async (connection, message)=>{
     try {
-        const streamdata = await getAudioStream(ytRes[0].id);
-        const resource = createAudioResource(streamdata);
-        connection.subscribe(player);
-        player.play(resource);
-        message.reply("Now Playing: "+ytRes[0].title);
-        player.on("idle",()=>{
-            try{
-                player.stop();
-                connection.destroy();
-            }
-            catch(e){
-                console.log(e);
-            }
-        })
+        const temp = getFromQueue();
+        if(temp){
+            const streamdata = await getAudioStream(temp.id);
+            const resource = createAudioResource(streamdata);
+            connection.subscribe(player);
+            player.play(resource);
+            message.reply("Now Playing: "+temp.title);
+            player.on("idle",()=>{
+                try{
+                    await playAudioVc(connection, message);
+                }
+                catch(e){
+                    console.log(e);
+                }
+            })
+        }
+        else{
+            player.stop();
+            connection.destroy();
+        }
     } catch (error) {
         console.log(error);
+    }
+}
+
+//PRINT QUEUE
+const printQueue = (message)=>{
+    var temp = "[Queue Items]";
+    if(musicQueue.length>0){
+        for(let i = 0; i < musicQueue.length; i++){
+            temp = i+") "+temp+"\n"+musicQueue[i].title;
+        }
+        message.reply(temp);
+    }
+    else{
+        message.reply("Queue Empty!");
+    }
+}
+
+//ADD TO QUEUE
+const addToQueue = (message, music)=>{
+    musicQueue.push(music);
+    message.reply("Added To Queue: "+music.title);
+}
+
+//REMOVE FROM QUEUE ON FINISH
+const removeFromQueue = ()=>{
+    musicQueue = musicQueue.splice(0, 1);
+}
+
+//REMOVE FROM QUEUE (SPECIFIC)
+const removeFromQueueSpecific = (message, index)=>{
+    if(musicQueue.length>0 && index>0 && index<=musicQueue.length){
+        message.reply("Removed from Queue: "+musicQueue[index-1].title);
+        musicQueue = musicQueue.splice(index-1, 1);
+    }
+    else{
+        message.reply("Couldn't Remove!");
+    }
+}
+
+//GET FIRST FROM QUEUE ON FINISH
+const getFromQueue = ()=>{
+    if(musicQueue.length>0){
+        temp = musicQueue[0];
+        removeFromQueue();
+        return temp;
+    }
+    else{
+        return false;
     }
 }
