@@ -1,4 +1,3 @@
-process.env.YTDL_NO_UPDATE = "1";
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core');
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, NoSubscriberBehavior } = require('@discordjs/voice');
