@@ -3,16 +3,11 @@ const ytdl = require('ytdl-core');
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, NoSubscriberBehavior } = require('@discordjs/voice');
 const youtubesearchapi = require('youtube-search-api');
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MESSAGE_TYPING", "GUILD_VOICE_STATES"] })
-const player = createAudioPlayer(
-    {
-        behaviors: {
-            noSubscriber: NoSubscriberBehavior.Play
-        }
-    }
-);
+const player = createAudioPlayer();
 var musicQueue = [];
 var message = null;
 var connection = null;
+var channel = null;
 
 client.login(process.env.BC);
 
@@ -41,8 +36,8 @@ client.on('messageCreate', async msg => {
                     break;
                 }
 
-                const channel = msg.member.voice.channel;
-
+                channel = msg.member.voice.channel;
+                
                 if(channel){
                     if(connection == null){
                         connection = joinVoiceChannel({
@@ -104,12 +99,6 @@ client.on('messageCreate', async msg => {
                 break;
             }
 
-            if(payload === "1"){
-                msg.reply("Skipped!");
-                player.stop();
-                break;
-            }
-            
             removeFromQueueSpecific(payload);
             break;
         default:
@@ -144,7 +133,15 @@ const getYtUrl = async (payload) => {
 //GET AUDIO STREAM FROM YOUTUBE
 const getAudioStream = (id) => {
     try {
-        return ytdl("https://www.youtube.com/watch?v=" + id, {filter:'audioonly'});
+        return ytdl("https://www.youtube.com/watch?v=" + id, {
+            filter: "audioonly",
+            fmt: "mp3",
+            highWaterMark: 1 << 62,
+            liveBuffer: 1 << 62,
+            dlChunkSize: 0, //disabling chunking is recommended in discord bot
+            bitrate: 128,
+            quality: "lowestaudio",
+       });
     } catch (error) {
         console.log(error);
     }
@@ -154,6 +151,7 @@ const getAudioStream = (id) => {
 player.on("idle", async () => {
     try{
         const temp = getFromQueue();
+        
         if(temp){
             const streamdata = getAudioStream(temp.id);
             const resource = createAudioResource(streamdata);
@@ -165,6 +163,9 @@ player.on("idle", async () => {
             player.stop();
             connection.destroy();
             connection = null;
+            channel = null;
+            message = null;
+            musicQueue = [];
         }
     }
     catch(e){
