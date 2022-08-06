@@ -15,8 +15,7 @@ var musicQueue = [];
 var message = null;
 var connection = null;
 
-//client.login(process.env.BC);
-client.login("MTAwNDQ2ODI4NjcwNjE3NjE2Mg.Gw_FLJ.9zx_utFTqGNZdFUDffV8oCxljaVe8Z13RlN6lY");
+client.login(process.env.BC);
 
 client.once('ready', () => {
     console.log("BingChilling!");
