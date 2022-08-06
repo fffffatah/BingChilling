@@ -1,21 +1,27 @@
 const Discord = require('discord.js');
-const ytdl = require('ytdl-core')
-const { createAudioPlayer, createAudioResource, joinVoiceChannel } = require('@discordjs/voice');
+const ytdl = require('ytdl-core');
+const { createAudioPlayer, createAudioResource, joinVoiceChannel, NoSubscriberBehavior } = require('@discordjs/voice');
 const youtubesearchapi = require('youtube-search-api');
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MESSAGE_TYPING", "GUILD_VOICE_STATES"] })
-const player = createAudioPlayer();
+const player = createAudioPlayer(
+    {
+        behaviors: {
+            noSubscriber: NoSubscriberBehavior.Play
+        }
+    }
+);
 var musicQueue = [];
 var message = null;
 var connection = null;
 
 client.login(process.env.BC);
 
-client.once('ready',()=>{
+client.once('ready', () => {
     console.log("BingChilling!");
     client.user.setActivity("$help",{type:'LISTENING'});
 });
 
-client.on('messageCreate',async msg=>{
+client.on('messageCreate', async msg => {
     message = msg;
     const command = parseCommand();
     const payload = parsePayload();
@@ -24,13 +30,13 @@ client.on('messageCreate',async msg=>{
         case "play":
             console.log(payload);
 
-            if(payload === ("$"+command)) break;
+            if(payload === ("$" + command)) break;
 
             try {
                 const ytRes = await getYtUrl(payload);
                 console.log(ytRes[0]);
 
-                if(ytRes.length<1){
+                if(ytRes.length < 1){
                     msg.reply("Unable to Play Track!");
                     break;
                 }
@@ -50,14 +56,16 @@ client.on('messageCreate',async msg=>{
                     msg.reply("You must be in a Voice Channel!");
                     break;
                 }
+
                 if(player.state.status === "buffering" || player.state.status === "playing" || player.state.status === "paused"){
                     addToQueue(ytRes[0]);
                     break;
                 }
+
                 addToQueue(ytRes[0]);
                 const temp = getFromQueue();
                 if(temp){
-                    const streamdata = await getAudioStream(temp.id);
+                    const streamdata = getAudioStream(temp.id);
                     const resource = createAudioResource(streamdata);
                     connection.subscribe(player);
                     player.play(resource);
@@ -92,14 +100,16 @@ client.on('messageCreate',async msg=>{
             player.stop();
             break;
         case "remove":
-            if(payload === ("$"+command)){
+            if(payload === ("$" + command)){
                 break;
             }
+
             if(payload === "1"){
                 msg.reply("Skipped!");
                 player.stop();
                 break;
             }
+            
             removeFromQueueSpecific(payload);
             break;
         default:
@@ -110,7 +120,7 @@ client.on('messageCreate',async msg=>{
 
 
 //COMMAND PARSER
-const parseCommand = ()=>{
+const parseCommand = () => {
     const prefix = "$";
     if(!message.content.startsWith(prefix) || message.author.bot) return;
         const args = message.content.slice(prefix.length).split(/ +/);
@@ -118,12 +128,12 @@ const parseCommand = ()=>{
         return command;
 }
 //PAYLOAD PARSER
-const parsePayload = ()=>{
+const parsePayload = () => {
     const args = message.content.substring(message.content.indexOf(" ") + 1);
-        return args;
+    return args;
 }
 //GET YOUTUBE VIDEO ID
-const getYtUrl = async (payload)=>{
+const getYtUrl = async (payload) => {
     try {
         const res = await youtubesearchapi.GetListByKeyword(payload, false, 1);
         return res.items;
@@ -132,25 +142,23 @@ const getYtUrl = async (payload)=>{
     }
 }
 //GET AUDIO STREAM FROM YOUTUBE
-const getAudioStream = async (id)=>{
+const getAudioStream = (id) => {
     try {
-        const res = await ytdl("https://www.youtube.com/watch?v="+id+"&bpctr=9999999999", {filter:'audioonly', format:'mp3'});
-        return res;
+        return ytdl("https://www.youtube.com/watch?v=" + id, {filter:'audioonly'});
     } catch (error) {
         console.log(error);
     }
 }
 
 //PLAY AUDIO IN VC
-player.on("idle",async ()=>{
+player.on("idle", async () => {
     try{
         const temp = getFromQueue();
         if(temp){
-            const streamdata = await getAudioStream(temp.id);
+            const streamdata = getAudioStream(temp.id);
             const resource = createAudioResource(streamdata);
-            //connection.subscribe(player);
             player.play(resource);
-            message.reply("Now Playing: "+temp.title);
+            message.reply("Now Playing: " + temp.title);
             musicQueue.splice(0, 1);
         }
         else{
@@ -166,13 +174,13 @@ player.on("idle",async ()=>{
 
 
 //PRINT QUEUE
-const printQueue = ()=>{
+const printQueue = () => {
     var temp = "";
     if(musicQueue.length>0){
         for(let i = 0; i < musicQueue.length; i++){
-            temp = temp+"\n"+(i+1)+") "+musicQueue[i].title;
+            temp = temp + "\n" + (i + 1) + ") " + musicQueue[i].title;
         }
-        message.reply("[Queue Items]"+temp);
+        message.reply("[Queue Items]" + temp);
     }
     else{
         message.reply("Queue Empty!");
@@ -180,15 +188,15 @@ const printQueue = ()=>{
 }
 
 //ADD TO QUEUE
-const addToQueue = (music)=>{
+const addToQueue = (music) => {
     musicQueue.push(music);
-    message.reply("Added To Queue: "+music.title);
+    message.reply("Added To Queue: " + music.title);
 }
 
 //REMOVE FROM QUEUE (SPECIFIC)
-const removeFromQueueSpecific = (index)=>{
-    if(musicQueue.length>0 && index>0 && index<=musicQueue.length){
-        message.reply("Removed from Queue: "+musicQueue[index-1].title);
+const removeFromQueueSpecific = (index) => {
+    if(musicQueue.length > 0 && index > 0 && index <= musicQueue.length){
+        message.reply("Removed from Queue: " + musicQueue[index-1].title);
         musicQueue.splice(index-1, 1);
     }
     else{
@@ -197,7 +205,7 @@ const removeFromQueueSpecific = (index)=>{
 }
 
 //GET FIRST FROM QUEUE ON FINISH
-const getFromQueue = ()=>{
+const getFromQueue = () => {
     if(musicQueue.length > 0){
         temp = musicQueue[0];
         return temp;
