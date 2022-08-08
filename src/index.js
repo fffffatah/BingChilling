@@ -1,15 +1,19 @@
 const Discord = require('discord.js');
-const ytdl = require('ytdl-core');
+const playdl = require('play-dl');
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, NoSubscriberBehavior } = require('@discordjs/voice');
 const youtubesearchapi = require('youtube-search-api');
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MESSAGE_TYPING", "GUILD_VOICE_STATES"] })
-const player = createAudioPlayer();
+const player = createAudioPlayer({
+    behaviors: {
+        noSubscriber: NoSubscriberBehavior.Play
+    }
+});
 var musicQueue = [];
 var message = null;
 var connection = null;
 var channel = null;
 
-client.login(process.env.BC);
+client.login("MTAwNDQ2ODI4NjcwNjE3NjE2Mg.G0pIzc.28fS32q4hx81SIsufe9EK0Kw1SejpxJZZqtGFQ");
 
 client.once('ready', () => {
     console.log("BingChilling!");
@@ -60,10 +64,8 @@ client.on('messageCreate', async msg => {
                 addToQueue(ytRes[0]);
                 const temp = getFromQueue();
                 if(temp){
-                    const streamdata = getAudioStream(temp.id);
-                    const resource = createAudioResource(streamdata);
                     connection.subscribe(player);
-                    player.play(resource);
+                    player.play(await getAudioStream(temp.id));
                     message.reply("Now Playing: "+temp.title);
                     musicQueue.splice(0, 1);
                 }
@@ -106,8 +108,6 @@ client.on('messageCreate', async msg => {
       }
 })
 
-
-
 //COMMAND PARSER
 const parseCommand = () => {
     const prefix = "$";
@@ -116,11 +116,13 @@ const parseCommand = () => {
         const command = args.shift().toLowerCase();
         return command;
 }
+
 //PAYLOAD PARSER
 const parsePayload = () => {
     const args = message.content.substring(message.content.indexOf(" ") + 1);
     return args;
 }
+
 //GET YOUTUBE VIDEO ID
 const getYtUrl = async (payload) => {
     try {
@@ -130,18 +132,21 @@ const getYtUrl = async (payload) => {
         console.log(error);
     }
 }
+
+//GET YOUTUBE URL
+const getYouTubeUrl = (videoId) => {
+    return "https://www.youtube.com/watch?v=" + videoId;
+}
+
 //GET AUDIO STREAM FROM YOUTUBE
-const getAudioStream = (id) => {
+const getAudioStream = async (videoId) => {
     try {
-        return ytdl("https://www.youtube.com/watch?v=" + id, {
-            filter: "audioonly",
-            fmt: "mp3",
-            highWaterMark: 1 << 62,
-            liveBuffer: 1 << 62,
-            dlChunkSize: 0, //disabling chunking is recommended in discord bot
-            bitrate: 128,
-            quality: "lowestaudio",
-       });
+        let audioStream = await playdl.stream(getYouTubeUrl(videoId));
+        let resource = createAudioResource(audioStream.stream, {
+            inputType: audioStream.type
+        });
+
+        return resource;
     } catch (error) {
         console.log(error);
     }
@@ -153,10 +158,8 @@ player.on("idle", async () => {
         const temp = getFromQueue();
         
         if(temp){
-            const streamdata = getAudioStream(temp.id);
-            const resource = createAudioResource(streamdata);
-            player.play(resource);
-            message.reply("Now Playing: " + temp.title);
+            player.play(await getAudioStream(temp.id));
+            message.channel.send("Now Playing: " + temp.title);
             musicQueue.splice(0, 1);
         }
         else{
@@ -172,7 +175,6 @@ player.on("idle", async () => {
         console.log(e);
     }
 });
-
 
 //PRINT QUEUE
 const printQueue = () => {
