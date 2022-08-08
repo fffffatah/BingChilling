@@ -15,8 +15,7 @@
     "ffmpeg-static": "^4.4.0",
     "libsodium-wrappers": "^0.7.9",
     "play-dl": "^1.9.5",
-    "youtube-search-api": "^1.0.11",
-    "ytdl-core": "^4.11.0"
+    "youtube-search-api": "^1.0.11"
   },
   "engines": {
     "node": "16.x"
