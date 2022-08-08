@@ -13,7 +13,7 @@ var message = null;
 var connection = null;
 var channel = null;
 
-client.login("MTAwNDQ2ODI4NjcwNjE3NjE2Mg.G0pIzc.28fS32q4hx81SIsufe9EK0Kw1SejpxJZZqtGFQ");
+client.login(process.env.BC);
 
 client.once('ready', () => {
     console.log("BingChilling!");
