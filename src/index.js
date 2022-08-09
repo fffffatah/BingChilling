@@ -5,7 +5,7 @@ const youtubesearchapi = require('youtube-search-api');
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MESSAGE_TYPING", "GUILD_VOICE_STATES"] })
 const player = createAudioPlayer({
     behaviors: {
-        noSubscriber: NoSubscriberBehavior.Play
+        noSubscriber: NoSubscriberBehavior.Stop
     }
 });
 var musicQueue = [];
@@ -106,7 +106,31 @@ client.on('messageCreate', async msg => {
         default:
             break;
       }
-})
+});
+
+//PLAY AUDIO IN VC
+player.on("idle", async () => {
+    try{
+        const temp = getFromQueue();
+        
+        if(temp){
+            player.play(await getAudioStream(temp.id));
+            message.channel.send("Now Playing: " + temp.title);
+            musicQueue.splice(0, 1);
+        }
+        else{
+            player.stop();
+            connection.destroy();
+            connection = null;
+            channel = null;
+            message = null;
+            musicQueue = [];
+        }
+    }
+    catch(e){
+        console.log(e);
+    }
+});
 
 //COMMAND PARSER
 const parseCommand = () => {
@@ -141,7 +165,7 @@ const getYouTubeUrl = (videoId) => {
 //GET AUDIO STREAM FROM YOUTUBE
 const getAudioStream = async (videoId) => {
     try {
-        let audioStream = await playdl.stream(getYouTubeUrl(videoId));
+        let audioStream = await playdl.stream(getYouTubeUrl(videoId), {discordPlayerCompatibility: true});
         let resource = createAudioResource(audioStream.stream, {
             inputType: audioStream.type
         });
@@ -151,30 +175,6 @@ const getAudioStream = async (videoId) => {
         console.log(error);
     }
 }
-
-//PLAY AUDIO IN VC
-player.on("idle", async () => {
-    try{
-        const temp = getFromQueue();
-        
-        if(temp){
-            player.play(await getAudioStream(temp.id));
-            message.channel.send("Now Playing: " + temp.title);
-            musicQueue.splice(0, 1);
-        }
-        else{
-            player.stop();
-            connection.destroy();
-            connection = null;
-            channel = null;
-            message = null;
-            musicQueue = [];
-        }
-    }
-    catch(e){
-        console.log(e);
-    }
-});
 
 //PRINT QUEUE
 const printQueue = () => {
