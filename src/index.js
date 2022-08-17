@@ -3,7 +3,11 @@ const playdl = require('play-dl');
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, NoSubscriberBehavior } = require('@discordjs/voice');
 const youtubesearchapi = require('youtube-search-api');
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MESSAGE_TYPING", "GUILD_VOICE_STATES"] })
-const player = createAudioPlayer();
+const player = createAudioPlayer({
+    behaviors: {
+        noSubscriber: NoSubscriberBehavior.Stop
+    }
+});;
 var musicQueue = [];
 var message = null;
 var connection = null;
