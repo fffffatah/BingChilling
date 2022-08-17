@@ -7,7 +7,7 @@ const player = createAudioPlayer({
     behaviors: {
         noSubscriber: NoSubscriberBehavior.Stop
     }
-});;
+});
 var musicQueue = [];
 var message = null;
 var connection = null;
