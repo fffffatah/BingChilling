@@ -161,7 +161,7 @@ const getYouTubeUrl = (videoId) => {
 //GET AUDIO STREAM FROM YOUTUBE
 const getAudioStream = async (videoId) => {
     try {
-        let audioStream = await playdl.stream(getYouTubeUrl(videoId), {discordPlayerCompatibility: true});
+        let audioStream = await playdl.stream(getYouTubeUrl(videoId));
 
         let resource = createAudioResource(audioStream.stream, {
             inputType: audioStream.type
