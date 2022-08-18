@@ -30,7 +30,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: index.docker.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC108CA312DC4B64BE8DAC3D52B68C7A }}/fffffatah/bing-chilling:${{ github.sha }}
+        tags: index.docker.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC108CA312DC4B64BE8DAC3D52B68C7A }}/bing-chilling:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -48,4 +48,4 @@ jobs:
         app-name: 'bing-chilling'
         slot-name: 'production'
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_13B4B672DEAE48AB8379E65AF31487E9 }}
-        images: 'index.docker.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC108CA312DC4B64BE8DAC3D52B68C7A }}/fffffatah/bing-chilling:${{ github.sha }}'
+        images: 'index.docker.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC108CA312DC4B64BE8DAC3D52B68C7A }}/bing-chilling:${{ github.sha }}'
