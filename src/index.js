@@ -5,7 +5,7 @@ const youtubesearchapi = require('youtube-search-api');
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MESSAGE_TYPING", "GUILD_VOICE_STATES"] })
 const player = createAudioPlayer({
     behaviors: {
-        noSubscriber: NoSubscriberBehavior.Play
+        noSubscriber: NoSubscriberBehavior.Stop
     }
 });
 var musicQueue = [];
@@ -165,7 +165,7 @@ const getYouTubeUrl = (videoId) => {
 //GET AUDIO STREAM FROM YOUTUBE
 const getAudioStream = async (videoId) => {
     try {
-        let audioStream = await playdl.stream(getYouTubeUrl(videoId), {discordPlayerCompatibility: true});
+        let audioStream = await playdl.stream(getYouTubeUrl(videoId));
         let resource = createAudioResource(audioStream.stream, {
             inputType: audioStream.type
         });
