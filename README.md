@@ -1,3 +1,5 @@
+[![Build and Deploy](https://github.com/fffffatah/BingChilling/actions/workflows/main_bing-chilling.yml/badge.svg)](https://github.com/fffffatah/BingChilling/actions/workflows/main_bing-chilling.yml)
+
 # Getting Started
 
 BingChilling is a Discord music bot with basic functionalities. 
