@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy container app to Azure Web App - bing-chilling
+name: Build and Deploy
 
 on:
   push:
@@ -23,14 +23,14 @@ jobs:
       uses: docker/login-action@v1
       with:
         registry: https://index.docker.io/v1/
-        username: ${{ secrets.AzureAppService_ContainerUsername_fc108ca312dc4b64be8dac3d52b68c7a }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_abf1040b90264f3fbb9ca4ce8710b664 }}
+        username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC108CA312DC4B64BE8DAC3D52B68C7A }}
+        password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_ABF1040B90264F3FBB9CA4CE8710B664 }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_fc108ca312dc4b64be8dac3d52b68c7a }}/fffffatah/bing-chilling:${{ github.sha }}
+        tags: index.docker.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC108CA312DC4B64BE8DAC3D52B68C7A }}/fffffatah/bing-chilling:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'bing-chilling'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_13b4b672deae48ab8379e65af31487e9 }}
-        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_fc108ca312dc4b64be8dac3d52b68c7a }}/fffffatah/bing-chilling:${{ github.sha }}'
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_13B4B672DEAE48AB8379E65AF31487E9 }}
+        images: 'index.docker.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FC108CA312DC4B64BE8DAC3D52B68C7A }}/fffffatah/bing-chilling:${{ github.sha }}'
